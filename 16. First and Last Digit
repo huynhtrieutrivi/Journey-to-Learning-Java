@@ -1,0 +1,19 @@
+public class FirstLastDigitSum {
+        public static int sumFirstAndLastDigit(int number){
+        int firstDigit = 0;
+        int identicalCopy = number;
+        int secondDigit = 0;
+        if(number < 0){
+            return -1;
+        }
+        while(identicalCopy!=0){
+            firstDigit = identicalCopy%10;
+            identicalCopy /= 10;
+        }
+
+        secondDigit = number % 10;
+
+        int sum = firstDigit + secondDigit;
+        return sum;
+    }
+}
