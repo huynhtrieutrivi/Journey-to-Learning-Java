@@ -1,0 +1,43 @@
+public class SimpleCalculator {
+    private double firstNumber;
+    private double secondNumber;
+
+    public void setFirstNumber(double number){
+        this.firstNumber = number;
+    }
+
+    public double getFirstNumber(){
+        return this.firstNumber;
+    }
+
+    public void setSecondNumber(double number){
+        this.secondNumber = number;
+    }
+
+    public double getSecondNumber(){
+        return this.secondNumber;
+    }
+
+    public double getAdditionResult(){
+        double additionSum = this.firstNumber + this.secondNumber;
+        return additionSum;
+    }
+
+    public double getSubtractionResult(){
+        double subtractionValue = this.firstNumber - this.secondNumber;
+        return subtractionValue;
+    }
+
+    public double getMultiplicationResult(){
+        double multiplicationResult = this.firstNumber * this.secondNumber;
+        return multiplicationResult;
+    }
+
+    public double getDivisionResult(){
+        if(this.secondNumber == 0){
+            return 0;
+        }
+        double divisionResult = this.firstNumber / this.secondNumber;
+        return divisionResult;
+    }
+}
