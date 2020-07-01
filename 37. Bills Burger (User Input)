@@ -1,0 +1,195 @@
+package com.ViHuynh;
+import java.util.Scanner;
+
+public class Main {
+
+    public static void main(String[] args) {
+        Scanner scan = new Scanner(System.in);
+        String name = "Bills Burger";
+        System.out.println("What is your name?");
+        String userName = scan.nextLine();
+        System.out.println("Hello " + userName + "! Welcome to " + name);
+        System.out.println("What would you like to order today?");
+        System.out.println("The selections are: Regular Burger, Healthy Burger, Deluxe Burger");
+        boolean hasNextLine = scan.hasNextLine();
+        while(hasNextLine){
+            String select = scan.nextLine();
+            if(select.toLowerCase().equals("regular burger")) {
+                RegularBurger burger = new RegularBurger();
+                burger.showBasePrice();
+                burger.selectingAdditions();
+                burger.showAdditions();
+                burger.totalCost();
+                hasNextLine = false;
+            }else if(select.toLowerCase().equals("healthy burger")){
+                HealthyBurger burger = new HealthyBurger();
+                burger.showBasePrice();
+                burger.selectingAdditions();
+                burger.showAdditions();
+                burger.totalCost();
+                hasNextLine = false;
+            }else if(select.toLowerCase().equals("deluxe burger")){
+                DeluxeBurger burger = new DeluxeBurger();
+                burger.showBasePrice();
+                burger.selectingAdditions();
+                burger.showAdditions();
+                burger.totalCost();
+                hasNextLine = false;
+            }else{
+                System.out.println("Please select a valid burger type!");
+            }
+        }
+    }
+}
+
+package com.ViHuynh;
+
+public class DeluxeBurger extends Burger{
+    public DeluxeBurger() {
+        super("Deluxe Burger", 5, "Deluxe", 0, true);
+    }
+
+    @Override
+    public void selectingAdditions() {
+        System.out.println("Comes with chips and drinks as addition");
+        addPrice(2.50);
+    }
+
+    @Override
+    public void showAdditions() {
+        super.showAdditions();
+
+        System.out.println("Notice: (Including chips and drinks) for total");
+    }
+}
+
+package com.ViHuynh;
+import java.util.Scanner;
+
+public class Burger {
+    Scanner scan = new Scanner(System.in);
+    private String breadType;
+    private int additions = 0;
+    private int maxAdditions;
+    private boolean meat;
+    private double pricingTotal;
+    private double baseBurgerPrice;
+    private String burgerName;
+    private int tomatoes;
+    private int lettuces;
+    private int onions;
+    private int grilledOnions;
+
+    public Burger(String burgerName,double baseBurgerPrice, String breadType, int maxAdditions, boolean meat){
+        this.burgerName = burgerName;
+        this.baseBurgerPrice = baseBurgerPrice;
+        this.maxAdditions = maxAdditions;
+        this.breadType = breadType;
+        this.meat = meat;
+    }
+
+    public void addPrice(double price){
+        this.pricingTotal += price;
+    }
+
+    public void selectingAdditions(){
+
+        while(additions <= maxAdditions){
+            int switchCase;
+            System.out.println("You have up to " + (maxAdditions-additions) + " additions left.");
+            System.out.println("$1.25 will be added to the total price for each additions.");
+            System.out.println("Please enter 1 for tomatoes");
+            System.out.println("Please enter 2 for lettuce");
+            System.out.println("Please enter 3 for onions");
+            System.out.println("Please enter 4 for grilled-onions");
+            System.out.println("Please enter 5 to not add/stop adding");
+            boolean isNumber = scan.hasNextInt();
+
+            if(isNumber) {
+                switchCase = scan.nextInt();
+                if (switchCase > 0 && switchCase < 6) {
+                    switch (switchCase) {
+                        case 1:
+                            tomatoes++;
+                            pricingTotal += 1.25;
+                            additions++;
+                            break;
+                        case 2:
+                            lettuces++;
+                            pricingTotal += 1.25;
+                            additions++;
+                            break;
+                        case 3:
+                            onions++;
+                            pricingTotal += 1.25;
+                            additions++;
+                            break;
+                        case 4:
+                            grilledOnions++;
+                            pricingTotal += 1.25;
+                            additions++;
+                            break;
+                        case 5:
+                            break;
+                    }
+                } else {
+                    System.out.println("Please enter a valid number from 1-5!");
+                    continue;
+                }
+            }
+
+            System.out.println("Would you like to add more additions?");
+            System.out.println("Press 1 to continue or 2 to stop adding more additions.");
+            boolean isOneOrTwo = scan.hasNextInt();
+            while(isOneOrTwo){
+                int continueExit = scan.nextInt();
+                if(continueExit <= 2 && continueExit > 0){
+                    if (continueExit == 2) {
+                        isOneOrTwo = false;
+                        return;
+                    }else{
+                        break;
+                    }
+                }else{
+                    System.out.println("Enter either 1 or 2");
+                }
+            }
+        }
+    }
+
+    public void showAdditions(){
+        System.out.println("These are the additions you chose for your " + burgerName);
+        System.out.println("A total of " + additions + " additions has been selected and they are:");
+        System.out.println(tomatoes + " tomato slice");
+        System.out.println(lettuces + " lettuce slice");
+        System.out.println(onions + " onion slice");
+        System.out.println(grilledOnions + " grilled onion slice");
+    }
+
+    public void showBasePrice(){
+        System.out.println("The based-price for " + burgerName + " is $" + baseBurgerPrice);
+    }
+
+    public void totalCost(){
+        pricingTotal += baseBurgerPrice;
+        System.out.println("The total cost will be $" + pricingTotal + ".");
+        System.out.println("This includes all the additions as well!");
+    }
+}
+
+package com.ViHuynh;
+
+public class RegularBurger extends Burger{
+
+    public RegularBurger() {
+        super("Regular Burger", 5.00, "Regular", 4, true);
+    }
+}
+
+package com.ViHuynh;
+
+public class HealthyBurger extends Burger {
+    public HealthyBurger() {
+        super("Healthy Burger", 5, "Whole wheat", 6, true);
+    }
+}
