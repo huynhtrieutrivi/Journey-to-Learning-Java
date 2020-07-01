@@ -1,0 +1,184 @@
+package com.ViHuynh;
+import java.util.Scanner;
+public class Main {
+
+    private static Scanner scanner = new Scanner(System.in);
+
+    public static void main(String[] args) {
+        MobilePhone mobilePhone = new MobilePhone();
+        boolean condition = true;
+        outer:
+        while(condition){
+            System.out.println("");
+            System.out.println("What would you like to do?");
+            mobilePhone.contactMenuOption();
+            int choice = scanner.nextInt();
+            scanner.nextLine();
+
+            switch(choice){
+                case 1:
+                    System.out.println("Enter new contact name: \n");
+                    String name = scanner.nextLine();
+                    System.out.println("Enter " + name + "'s phone number: \n");
+                    String phoneNumber = scanner.nextLine();
+                    boolean addContact = mobilePhone.addNewContact(Contact.createContact(name,phoneNumber));
+                    if(addContact){
+                        System.out.println(name + " has been added to your contact.");
+                    }else{
+                        System.out.println(name + " already exists in your contact.");
+                    }
+                    continue outer;
+                case 2:
+                    System.out.println("Which contact would you like to remove?: \n");
+                    String searchedName = scanner.nextLine();
+                    boolean removeContact = mobilePhone.removeContact(searchedName);
+                    if(removeContact){
+                        System.out.println("Successfully removed " + searchedName + " from your contact.");
+                    }else{
+                        System.out.println(searchedName + " cannot be found and removed.");
+                    }
+                    continue outer;
+                case 3:
+                    System.out.println("Which contact would you like to modify?: \n");
+                    String modifyNameSearch = scanner.nextLine();
+                    System.out.println("Enter new contact name: \n");
+                    String modifyContactName = scanner.nextLine();
+                    System.out.println("Enter new contact number: \n");
+                    String modifyContactNumber = scanner.nextLine();
+                    Contact newContact = Contact.createContact(modifyContactName,modifyContactNumber);
+                    boolean modifyContact = mobilePhone.modifyContact(modifyNameSearch,newContact);
+                    if(modifyContact){
+                        System.out.println(modifyNameSearch + " has been replaced by " + modifyContactName);
+                    }else{
+                        System.out.println(modifyNameSearch + " cannot be found, no contact has been modified.");
+                    }
+                    continue outer;
+                case 4:
+                    System.out.println("Enter name you wished to searched: \n");
+                    mobilePhone.queryContact(scanner.nextLine());
+                    continue outer;
+                case 5:
+                    mobilePhone.printContactList();
+                    continue outer;
+                default:
+                    condition = false;
+            }
+        }
+    }
+}
+
+
+package com.ViHuynh;
+
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+
+public class MobilePhone {
+    private ArrayList<Contact> myContacts;
+
+    public MobilePhone(){
+        this.myContacts = new ArrayList<Contact>();
+    }
+
+    public boolean addNewContact(Contact contact) {
+        if(findContact(contact.getName()) >= 0){
+            System.out.println("Contact is already on file.");
+            return false;
+        }
+
+        myContacts.add(contact);
+        return true;
+    }
+
+    private int findContact(Contact contact) {
+        return this.myContacts.indexOf(contact);
+    }
+
+    private int findContact(String contactName){
+        for(int i = 0; i < myContacts.size(); i++){
+            Contact name = myContacts.get(i);
+            if(contactName.equals(name.getName())){
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    public boolean modifyContact(String contactName, Contact newContact) {
+        int index = findContact(contactName);
+        if(index >= 0){
+            myContacts.set(index, newContact);
+            return true;
+        }
+        return false;
+    }
+
+
+    public boolean removeContact(String contactName) {
+        int index = findContact(contactName);
+        if(index >= 0){
+            myContacts.remove(index);
+            return true;
+        }
+        return false;
+    }
+
+    public void queryContact(String contact) {
+        int index = findContact(contact)+1;
+        Contact currentContact = myContacts.get(index);
+
+        if(index >= 0){
+            System.out.println("Contact name: " + currentContact.getName());
+            System.out.println("Phone number: " + currentContact.getPhoneNumber());
+        }else{
+            System.out.println(contact + " cannot be found");
+        }
+
+    }
+
+    public void printContactList(){
+        for(int i = 0; i < myContacts.size(); i++){
+            Contact contact = myContacts.get(i);
+            String contactName = contact.getName();
+            String contactPhoneNumber = contact.getPhoneNumber();
+            System.out.println("======"+(i+1)+"======");
+            System.out.println("Name: " + contactName);
+            System.out.println("Phone Number: " + contactPhoneNumber);
+        }
+    }
+
+    public void contactMenuOption(){
+        System.out.println("1. Add contact");
+        System.out.println("2. Remove contact");
+        System.out.println("3. Modify contact");
+        System.out.println("4. Find contact");
+        System.out.println("5. Contact list");
+        System.out.println("6. Exit \n");
+    }
+
+}
+
+package com.ViHuynh;
+
+public class Contact {
+    private String name;
+    private String phoneNumber;
+
+    public Contact(String name, String phoneNumber) {
+        this.name = name;
+        this.phoneNumber = phoneNumber;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public static Contact createContact(String name, String phoneNumber) {
+        return new Contact(name, phoneNumber);
+    }
+
+}
