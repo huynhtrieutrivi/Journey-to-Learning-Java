@@ -1,0 +1,27 @@
+public class GreatestCommonDivisor {
+    public static int getGreatestCommonDivisor(int first, int second){
+        // check to see parameters are greater than 10
+        if(first < 10 || second < 10){
+            return -1;
+        }
+        // defining variables
+        int smallerNum;
+        int largerNum;
+        int count = 0;
+
+        if(first>second){
+            largerNum = first;
+            smallerNum = second;
+        }else{
+            smallerNum = first;
+            largerNum = second;
+        }
+
+        for(int i = 2; i <= smallerNum; i++){
+            if(smallerNum%i==0 && largerNum%i==0){
+                count = i;
+            }
+        }
+        return count;
+    }
+}
