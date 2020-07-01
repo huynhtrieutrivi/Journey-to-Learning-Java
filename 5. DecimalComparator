@@ -1,0 +1,11 @@
+public class DecimalComparator{
+        public static boolean areEqualByThreeDecimalPlaces(double xNum, double yNum){
+            int aNum = (int) (xNum * 1000);
+            int bNum = (int) (yNum * 1000);
+
+            if(aNum == bNum){
+                return true;
+            }
+            return false; 
+        }
+}
