@@ -1,0 +1,428 @@
+// NOTE: A lot of bugs, didn't add any counter for invalid inputs and etc.
+package com.ViHuynh;
+import java.util.Scanner;
+
+public class Main {
+
+    private static Scanner scanner = new Scanner(System.in);
+
+    public static void main(String[] args) {
+        Playlist playlist = new Playlist();
+        boolean notQuitMainMenu = true;
+        while(notQuitMainMenu) {
+            printMenu();
+            int menuChoice = scanner.nextInt();
+
+            switch(menuChoice) {
+                case 1:
+                    boolean notQuitAlbumMenu = true;
+
+                    while(notQuitAlbumMenu) {
+                        printAlbumMenu();
+                        int albumMenuChoice = scanner.nextInt();
+                        scanner.nextLine();
+
+                        switch(albumMenuChoice) {
+                            case 1:
+                                playlist.printAlbumList();
+                                continue;
+                            case 2:
+                                addNewAlbum(playlist);
+                                continue;
+                            case 3:
+                                addSongToAlbum(playlist);
+                                continue;
+                            case 4:
+                                notQuitAlbumMenu = false;
+                                break;
+                            case 5:
+                                viewSongsInAlbum(playlist);
+                                continue;
+                            default:
+                                System.out.println("Please re-enter valid option choice.");
+                                break;
+                        }
+                    }
+                    continue;
+
+                case 2:
+                    boolean notQuitPlayListMenu = true;
+
+                    while(notQuitPlayListMenu) {
+                        printPlayListMenu();
+                        int playlistMenuChoice = scanner.nextInt();
+                        scanner.nextLine();
+
+                        switch(playlistMenuChoice) {
+                            case 1:
+                                playlist.printPlayListQueue();
+                                continue;
+                            case 2:
+                                addSongToPlayList(playlist);
+                                continue;
+                            case 3:
+                                removeSongFromPlayList(playlist);
+                                continue;
+                            case 4:
+                                listenToMusic(playlist);
+                                break;
+                            default:
+                                System.out.println("Please re-enter valid option choice.");
+                                notQuitPlayListMenu = false;
+                                break;
+                        }
+                    }
+                    continue;
+                case 3:
+                    notQuitMainMenu = false;
+                    break;
+            }
+        }
+    }
+
+    public static void printMenu() {
+        System.out.println("=====================");
+        System.out.println("Main Menu:");
+        System.out.println("1. View album option menu");
+        System.out.println("2. View playlist option menu");
+        System.out.println("3. Exit menu");
+        System.out.println("=====================\n");
+    }
+
+    public static void printAlbumMenu() {
+        System.out.println("=====================");
+        System.out.println("Album Option Menu:");
+        System.out.println("1. View album list");
+        System.out.println("2. Add new album");
+        System.out.println("3. Add song to album");
+        System.out.println("4. Exit to main menu");
+        System.out.println("5. View songs in album");
+        System.out.println("=====================\n");
+    }
+
+    public static void printPlayListMenu() {
+        System.out.println("=====================");
+        System.out.println("PlayList Option Menu:");
+        System.out.println("1. View playlist queue");
+        System.out.println("2. Add song to playlist");
+        System.out.println("3. remove song from playlist");
+        System.out.println("4. Listen to music");
+        System.out.println("5. Exit to main menu");
+        System.out.println("=====================\n");
+    }
+
+    public static void addNewAlbum(Playlist playlist) {
+        System.out.println("Enter new album name:\n");
+        String albumName = scanner.nextLine();
+
+        playlist.addAlbum(albumName);
+    }
+
+    public static void addSongToAlbum(Playlist playlist) {
+        System.out.println("Enter album name:\n");
+        String albumName = scanner.nextLine();
+        System.out.println("Enter song name:\n");
+        String songName = scanner.nextLine();
+        System.out.println("Enter song duration:\n");
+        String songDuration = scanner.nextLine();
+
+        playlist.addSongToAlbum(albumName,songName,songDuration);
+    }
+
+    public static void viewSongsInAlbum(Playlist playlist) {
+        System.out.println("Enter album name:\n");
+        String albumName = scanner.nextLine();
+
+        playlist.viewSongInAlbum(albumName);
+    }
+
+    public static void addSongToPlayList(Playlist playlist) {
+        System.out.println("Enter album name:\n");
+        String albumName = scanner.nextLine();
+        System.out.println("Enter song name:\n");
+        String songName = scanner.nextLine();
+
+        playlist.addSongToPlayList(songName,albumName);
+    }
+
+    public static void removeSongFromPlayList(Playlist playlist) {
+        System.out.println("Enter song name to be removed: \n");
+        String songNameForRemoval = scanner.nextLine();
+
+        playlist.removeSongFromPlayList(songNameForRemoval);
+    }
+
+    public static void listenToMusic(Playlist playlist) {
+        playlist.listenToMusic();
+    }
+
+}
+
+
+
+
+package com.ViHuynh;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.ListIterator;
+import java.util.Scanner;
+
+public class Playlist {
+    private ArrayList<Album> albumArrayList;
+    private LinkedList<Song> playList;
+    private static Scanner scanner = new Scanner(System.in);
+
+    public Playlist() {
+        this.albumArrayList = new ArrayList<Album>();
+        this.playList = new LinkedList<Song>();
+    }
+
+    public void addAlbum(String albumName) {
+        if(findAlbumIndex(albumName) < 0) {
+            Album tempAlbum = new Album(albumName);
+            albumArrayList.add(tempAlbum);
+        }else{
+            System.out.println("There is an existing album with similar name.");
+        }
+    }
+
+    public void addSongToPlayList(String songName, String albumName) {
+        if(findAlbumIndex(albumName) >= 0) {
+            Album tempAlbum = albumArrayList.get(findAlbumIndex(albumName));
+            if(tempAlbum.findSongIndex(songName) >= 0) {
+                Song tempSong = tempAlbum.returnSong(songName);
+                playList.add(tempSong);
+            }else{
+                System.out.println("Song cannot be found in album.");
+            }
+        }else{
+            System.out.println("Album cannot be found.");
+        }
+    }
+
+    public void printAlbumList() {
+        if(albumArrayList.size() >= 1) {
+            System.out.println("Album List:");
+            for(int i = 0; i < albumArrayList.size(); i++) {
+                Album tempAlbum = albumArrayList.get(i);
+                System.out.println(i + ". " + tempAlbum.getAlbumName());
+            }
+        }else{
+            System.out.println("There are no album added.");
+        }
+    }
+
+    public void printPlayListQueue() {
+        if(this.playList.size() > 0) {
+            Iterator<Song> songIterator = this.playList.listIterator();
+            int index = 0;
+
+            while(songIterator.hasNext()) {
+                System.out.println(index + ". " + songIterator.next().getName());
+                ++index;
+            }
+        }else{
+            System.out.println("No song in playlist queue!");
+        }
+    }
+
+    public void addSongToAlbum(String albumName, String songName, String songDuration) {
+        Album tempAlbum = albumArrayList.get(findAlbumIndex(albumName));
+        if(findAlbumIndex(albumName) >= 0) {
+            tempAlbum.addSong(songName, songDuration);
+        }else{
+            System.out.println("No album/song could be found!");
+        }
+    }
+
+    private int findAlbumIndex(String albumName) {
+        for(int i = 0; i < albumArrayList.size(); i++) {
+            Album tempAlbum = albumArrayList.get(i);
+            if(tempAlbum.getAlbumName().equals(albumName)) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    public void removeSongFromPlayList(String songName) {
+        ListIterator<Song> songListIterator = this.playList.listIterator();
+
+        while(songListIterator.hasNext()) {
+            int comparison = songListIterator.next().getName().compareTo(songName);
+
+            if(comparison == 0) {
+                System.out.println(songName + " has been removed\n");
+                songListIterator.remove();
+                return;
+            }
+        }
+        System.out.println("No song matches with " + songName + "\n");
+    }
+
+    public void viewSongInAlbum(String albumName) {
+        if(findAlbumIndex(albumName) >= 0) {
+            Album tempAlbum = albumArrayList.get(findAlbumIndex(albumName));
+            tempAlbum.getSong();
+        }else{
+            System.out.println("Unable to queue song due to invalid album name!\n");
+        }
+    }
+
+    public void listenToMusic() {
+        if(playList.size() > 0) {
+            ListIterator<Song> songListIterator = playList.listIterator();
+            boolean goingForward = true;
+            boolean notQuit = true;
+
+            while(notQuit) {
+                listenToMusicMenu();
+                int listenChoice = scanner.nextInt();
+
+                switch(listenChoice) {
+                    case 1:
+                        if(!goingForward) {
+                            if(songListIterator.hasNext()) {
+                                songListIterator.next();
+                            }
+                            goingForward = true;
+                        }
+                        if(songListIterator.hasNext()) {
+                            System.out.println("Now forwarding to playing " + songListIterator.next().getName() + "\n");
+                        }else{
+                            System.out.println("Has reach the end");
+                            goingForward = false;
+                        }
+                        break;
+                    case 2:
+                        if(goingForward) {
+                            if(songListIterator.hasPrevious()) {
+                                songListIterator.previous();
+                            }
+                            goingForward = false;
+                        }
+                        if(songListIterator.hasPrevious()) {
+                            System.out.println("Going backward to playing " + songListIterator.previous().getName() + "\n");
+                        }else {
+                            System.out.println("Has reach the beginning");
+                            goingForward = true;
+                        }
+                        break;
+                    case 3:
+                        songListIterator.previous();
+                        System.out.println("Now replaying " + songListIterator.next().getName() + "\n");
+                        break;
+                    case 4:
+                        printPlayListQueue();
+                        continue;
+                    default:
+                        notQuit = false;
+                        break;
+                }
+            }
+        }else{
+            System.out.println("Add music to play music!");
+        }
+    }
+
+    public static void listenToMusicMenu() {
+        System.out.println("=====================");
+        System.out.println("1. Skip forward");
+        System.out.println("2. Skip backward");
+        System.out.println("3. Replay current song");
+        System.out.println("4. View song queue");
+        System.out.println("5. Exit to main menu");
+        System.out.println("=====================\n");
+    }
+}
+
+package com.ViHuynh;
+
+import java.util.ArrayList;
+
+public class Album {
+
+    private ArrayList<Song> songArrayList;
+    private String albumName;
+
+    public Album(String albumName) {
+        this.albumName = albumName;
+        this.songArrayList = new ArrayList<Song>();
+    }
+
+    public String getAlbumName() {
+        return this.albumName;
+    }
+
+    public Song returnSong(String name) {
+        Song tempSong = songArrayList.get(findSongIndex(name));
+        return tempSong;
+    }
+
+    public void addSong(String songName, String duration) {
+        if(findSongIndex(songName) < 0) {
+            Song createSong = new Song(songName,duration);
+            songArrayList.add(createSong);
+            System.out.println("===========================");
+            System.out.println(songName + " has been added!");
+        }else{
+            System.out.println("===========================");
+            System.out.println("Song title already existed.");
+        }
+        System.out.println("===========================\n");
+    }
+
+    public void getSong() {
+        System.out.println("=================================");
+        System.out.println(albumName + "'s Songs: \n");
+        for(int i = 0; i < songArrayList.size(); i++) {
+            Song tempSong = songArrayList.get(i);
+            System.out.println((i+1) + ". " + tempSong.getName() +"\nDuration: " + tempSong.getSongDuration());
+        }
+
+        System.out.println("=================================\n");
+    }
+
+    public int findSongIndex(String songName) {
+        int index = 0;
+        for(int i = 0; i < songArrayList.size(); i++) {
+            Song tempSong = songArrayList.get(i);
+            if(tempSong.getName().equals(songName)) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+}
+
+package com.ViHuynh;
+
+public class Song {
+    private String name;
+    private String songDuration;
+
+    public Song(String name, String songDuration) {
+        this.name = name;
+        this.songDuration = songDuration;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setSongDuration(String duration) {
+        this.songDuration = songDuration;
+    }
+
+    public String getName() {
+        return this.name;
+    }
+
+    public String getSongDuration() {
+        return this.songDuration;
+    }
+}
+
