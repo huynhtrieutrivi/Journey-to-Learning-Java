@@ -1,0 +1,307 @@
+package com.vihuynh;
+
+import java.util.*;
+
+public class Main {
+
+    private static Scanner scanner = new Scanner(System.in);
+
+    public static void main(String[] args) {
+        Bank VIB = new Bank();
+        boolean condition = true;
+        System.out.println("Welcome to V.I.B Online Banking Application! \n");
+        outer:
+
+        while(condition) {
+            VIB.bankMenuList();
+            int choice = scanner.nextInt();
+            scanner.nextLine();
+
+            switch(choice) {
+                case 1:
+                    System.out.println("What would you like the brand's name to be? \n");
+                    String createBranchName = scanner.nextLine();
+                    Branches createsBranch = new Branches(createBranchName);
+                    VIB.setBranchArrayList(createsBranch, createBranchName);
+                    continue outer;
+                case 2:
+                    System.out.println("Enter branch's name you want to access: \n");
+                    VIB.showBranchesList();
+                    String branchChoice = scanner.nextLine();
+                    if (VIB.findBranch(branchChoice) >= 0) {
+                        Branches temp = VIB.getBranch(VIB.findBranch(branchChoice));
+
+                        System.out.println("Enter 1 if you're a new customer or 2 if you're an existing customer");
+                        int newExist = scanner.nextInt();
+                        scanner.nextLine();
+
+                        switch (newExist) {
+                            case 1:
+                                System.out.println("Enter name for your account: \n");
+                                String accountName = scanner.nextLine();
+                                System.out.println("Enter amount you want to deposit initially: \n");
+                                double initialDeposit = scanner.nextInt();
+
+                                Customer newCustomer = new Customer(accountName, initialDeposit);
+                                temp.setCustomer(newCustomer);
+
+                                boolean newCustomerBool = true;
+                                outer1:
+                                while (newCustomerBool) {
+                                    temp.getUserMenu();
+                                    int newUserInt = scanner.nextInt();
+
+                                    switch (newUserInt) {
+                                        case 1:
+                                            System.out.println("How much would you like to deposit?");
+                                            double depositAmount = scanner.nextInt();
+                                            temp.depositBalance(newCustomer, depositAmount);
+                                            System.out.println("You have deposited a total amount of " + depositAmount);
+                                            System.out.println("Balance: " + newCustomer.getBalance());
+                                            continue outer1;
+                                        case 2:
+                                            System.out.println("How much would you like to withdraw?");
+                                            double withdrawAmount = scanner.nextInt();
+                                            temp.withdrawBalance(newCustomer, withdrawAmount);
+                                            System.out.println("You have withdrawn a total amount of " + withdrawAmount);
+                                            System.out.println("Balance: " + newCustomer.getBalance());
+                                            continue outer1;
+                                        case 3:
+                                            newCustomer.getTransactionHistory();
+                                            continue outer1;
+                                        default:
+                                            newCustomerBool = false;
+                                            break;
+
+                                    }
+                                }
+                                continue outer;
+                            case 2:
+                                System.out.println("What is your account name?");
+                                String existingCustomerName = scanner.nextLine();
+                                if(temp.findUser(existingCustomerName) >= 0){
+                                    Customer existingCustomer = temp.convertIndexToCustomer(temp.findUser(existingCustomerName));
+                                    boolean existingAccount = true;
+                                    outer2:
+                                    while(existingAccount){
+                                        temp.getUserMenu();
+                                        int newUserInt = scanner.nextInt();
+
+                                        switch (newUserInt) {
+                                            case 1:
+                                                System.out.println("How much would you like to deposit?");
+                                                double depositAmount = scanner.nextInt();
+                                                temp.depositBalance(existingCustomer, depositAmount);
+                                                System.out.println("You have deposited a total amount of " + depositAmount);
+                                                System.out.println("Balance: " + existingCustomer.getBalance());
+                                                continue outer2;
+                                            case 2:
+                                                System.out.println("How much would you like to withdraw?");
+                                                double withdrawAmount = scanner.nextInt();
+                                                temp.withdrawBalance(existingCustomer, withdrawAmount);
+                                                System.out.println("You have withdrawn a total amount of " + withdrawAmount);
+                                                System.out.println("Balance: " + existingCustomer.getBalance());
+                                                continue outer2;
+                                            case 3:
+                                                existingCustomer.getTransactionHistory();
+                                                continue outer2;
+                                            default:
+                                                existingAccount = false;
+                                                continue outer;
+                                        }
+                                    }
+                                }else{
+                                    System.out.println(existingCustomerName + " could not be found.");
+                                    break;
+                                }
+                        }
+                    } else {
+                        System.out.println("Branch cannot be found!");
+                        continue outer;
+                    }
+                default:
+                    System.out.println("Thank you for using our app, bye bye!");
+                    condition = false;
+                    break;
+            }
+        }
+    }
+}
+
+
+package com.vihuynh;
+
+import java.util.ArrayList;
+
+public class Bank {
+
+    private ArrayList<Branches> branchArrayList;
+
+    public Bank() {
+        this.branchArrayList = new ArrayList<Branches>();
+    }
+
+    public Branches getBranch(int index) {
+        return this.branchArrayList.get(index);
+    }
+
+    public void setBranchArrayList(Branches branch, String name) {
+        this.branchArrayList.add(branch);
+        branch.setBranchName(name);
+    }
+
+    public void showBranchesList() {
+        for(int i = 0; i < branchArrayList.size(); i++) {
+            int indexNumber = i + 1;
+            Branches temp = branchArrayList.get(i);
+            System.out.println(indexNumber + ". " + temp.getBranchName());
+        }
+    }
+
+    public int findBranch(String name) {
+        for(int i = 0; i < branchArrayList.size(); i++) {
+            Branches nameCheck = branchArrayList.get(i);
+
+            if(nameCheck.getBranchName().equals(name)) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    public void bankMenuList(){
+        System.out.println("What would you like to do?");
+        System.out.println("1. Create a new branch");
+        System.out.println("2. Select an existing branch");
+        System.out.println("3. Exit");
+    }
+
+    public boolean createCustomer(String branchName, String customerName, Double initialBalance){
+        if(findBranch(branchName) >= 0) {
+            Branches temp =  branchArrayList.get(findBranch(branchName));
+            Customer newCustomer = new Customer(customerName,initialBalance);
+            temp.setCustomer(newCustomer);
+
+            System.out.println(branchName + ": account by the name of " + customerName + " with an initial balance" +
+                    " of " + initialBalance + " was created successfully");
+            return true;
+        }else{
+            System.out.println("Invalid bank branch, will exit now!");
+            return false;
+        }
+    }
+
+
+}
+
+
+package com.vihuynh;
+import com.vihuynh.Customer;
+
+import java.util.ArrayList;
+
+public class Branches {
+
+    private ArrayList<Customer> customerArrayList;
+    private String branchName;
+
+    public Branches(String name) {
+        this.customerArrayList = new ArrayList<Customer>();
+        this.branchName = name;
+    }
+
+    public String getBranchName() {
+        return this.branchName;
+    }
+
+    public void setBranchName(String BranchName) {
+        this.branchName = branchName;
+    }
+
+    public void setCustomer(Customer customer) {
+        customerArrayList.add(customer);
+    }
+
+    public Customer convertIndexToCustomer(int index){
+        return customerArrayList.get(index);
+    }
+
+    public void depositBalance(Customer customer, double money){
+        double currentBalance = customer.getBalance();
+        double calculations = currentBalance + money;
+        customer.setBalance(calculations);
+    }
+
+    public void withdrawBalance(Customer customer, double money){
+        double currentBalance = customer.getBalance();
+        double calculations = currentBalance - money;
+        customer.setBalance(calculations);
+    }
+
+    public void balance(String name) {
+        if(findUser(name) >= 0) {
+            Customer temp = customerArrayList.get(findUser(name));
+            System.out.println(temp.getBalance());
+        }else{
+            System.out.println(name + " cannot be found");
+        }
+    }
+
+    public void getUserMenu(){
+        System.out.println("What would you like to do?");
+        System.out.println("1. To deposit money");
+        System.out.println("2. To withdraw money");
+        System.out.println("3. To show past transactions");
+        System.out.println("4. To exit");
+    }
+
+    public int findUser(String name) {
+        for(int i = 0; i < customerArrayList.size(); i++) {
+            Customer nameCheck = customerArrayList.get(i);
+
+            if(nameCheck.getName().equals(name)) {
+                return i;
+            }
+        }
+        return -1;
+    }
+}
+
+package com.vihuynh;
+import java.util.ArrayList;
+
+public class Customer {
+    private String name;
+    private ArrayList<Double> balance;
+
+    public Customer(String name, double initialBalance) {
+        this.name = name;
+        this.balance = new ArrayList<Double>();;
+        this.balance.add(initialBalance);
+    }
+
+    public void setBalance(double value) {
+        this.balance.add(value);
+    }
+
+    public String getName() {
+        return this.name;
+    }
+
+    public double getBalance() {
+        double customerBalance = 0;
+        for(int i = 0; i < balance.size(); i++){
+            customerBalance = balance.get(i);
+        }
+        return customerBalance;
+    }
+
+    public void getTransactionHistory(){
+        for(int i = 0; i < balance.size(); i++){
+            System.out.println(i + ". " + balance.get(i));
+        }
+    }
+
+}
+
+
