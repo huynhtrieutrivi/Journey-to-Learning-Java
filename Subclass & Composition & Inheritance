@@ -1,0 +1,219 @@
+/**
+ *  Program 3b
+ *  Place & Location, display has-a relationship (composition)
+ *  CS108-3
+ *  09/24/2020
+ *  @author  Vi Huynh
+ */
+public class Place {
+
+    private String name;
+    private String description;
+    private Location location;
+
+    public Place(String name, String desc, double latitude, double longitude) {
+        this.location = new Location(latitude,longitude);
+        this.name = name;
+        this.description = desc;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getName() {
+        return this.name;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getDescription() {
+        return this.description;
+    }
+
+    public void setLocation(double latitude, double longitude) {
+        this.location = new Location(latitude,longitude);
+    }
+
+    //method overloading
+    public void setLocation(Location location) {
+        this.location = location;
+    }
+
+    public Location getLocation() {
+        return location;
+    }
+
+    //overriding superclass Object's toString() method
+    @Override
+    public String toString() {
+        return this.name + " (latitude:" + this.location.getLatitude() +
+                ",longitude:" + this.location.getLongitude() + ")";
+    }
+
+    public String getID() {
+        return "Program 3b, Vi Huynh";
+    }
+}
+
+-----------------------------------------------------------------------------------
+
+/**
+ *  Program 3a
+ *  Location Class + Methods
+ *  CS108-3
+ *  09/24/2020
+ *  @author  Vi Huynh
+ */
+public class Location {
+
+    private final double EARTH_RADIUS_MILES = 3963.1676;
+    private double longitude;
+    private double latitude;
+
+    public Location () {
+        this.longitude = 0;
+        this.latitude = 0;
+    }
+
+    public Location (double lat, double lon) {
+        this.longitude = lon;
+        this.latitude = lat;
+    }
+
+    public void setLongitude(double longitude) {
+        this.longitude = longitude;
+    }
+
+    public double getLongitude() {
+        return this.longitude;
+    }
+
+    public void setLatitude(double latitude) {
+        this.latitude = latitude;
+    }
+
+    public double getLatitude() {
+        return this.latitude;
+    }
+
+    @Override
+    public String toString() {
+        return "latitude:" + this.latitude + ",longitude:" + this.longitude;
+    }
+
+    public double distanceFrom(Location other) {
+        double lat1 = Math.toRadians(other.getLatitude());
+        double lon1 = Math.toRadians(other.getLongitude());
+
+        double lat2 = this.latitude;
+        double lon2 = this.longitude;
+
+        //Apply the spherical law of cosines with a triangle
+        double theCos = Math.sin(lat1) * Math.sin(lat2) + Math.cos(lat1) * Math.cos(lat2) * Math.cos(lon1 - lon2);
+        double arcLength = Math.acos(theCos);
+        return arcLength * EARTH_RADIUS_MILES;
+    }
+
+    public boolean equals(Location o) {
+        return ((Math.abs(this.getLatitude()-o.getLatitude()) <= .0001) & (Math.abs(this.getLongitude() - o.getLongitude()) <= .0001));
+    }
+
+    public String getID() {
+        return "Program 3b, Vi Huynh";
+    }
+}
+
+-----------------------------------------------------------------------------------
+
+public class Eatery extends Place {
+    double cost;
+    String cuisine;
+    int starRating;
+
+    public Eatery(String name, String desc, double latitude, double longitude, String cuisine, double cost, int starRating) {
+        super(name, desc, latitude, longitude);
+        this.cost = cost;
+        this.cuisine = cuisine;
+        this.starRating = starRating;
+    }
+
+    public double getCost() {
+        return cost;
+    }
+
+    public String getCuisine() {
+        return cuisine;
+    }
+
+    public int getRating() {
+        return starRating;
+    }
+
+    public String ratingToStars() {
+        String stars = "";
+        for(int i = 0; i < this.starRating; i++) {
+            stars += "*";
+        }
+
+        return stars;
+    }
+
+    public String getCostToSymbols() {
+        if (this.getCost() < 25.0) {
+            return "$";
+        } else if (this.getCost() > 25.0 && this.getCost()  < 50.0) {
+            return "$$";
+        } else if (this.getCost()  > 50.0 && this.getCost()  < 75.0) {
+            return "$$$";
+        } else if (this.getCost() > 75.0 && this.getCost()  < 100.0) {
+            return "$$$$";
+        } else {
+            return "$$$$+";
+        }
+    }
+
+    @Override
+    public String toString() {
+        return super.toString() + "\n\t" + "Price: " + this.getCostToSymbols() + "\n\t" + "Rating: " + ratingToStars();
+
+    }
+}
+
+-----------------------------------------------------------------------------------
+
+public class Attraction extends Place {
+    int type;
+    double price;
+
+    public Attraction(String name, String desc, double latitude, double longitude, double price, int type) {
+        super(name, desc, latitude, longitude);
+        this.type = type;
+        this.price = price;
+    }
+
+    public double getPrice() {
+        return this.price;
+    }
+
+    public int getType() {
+        return this.type;
+    }
+
+    public boolean hasAnimals() {
+        return (this.type > 0);
+    }
+
+    @Override
+    public String toString() {
+        super.toString();
+        if(hasAnimals()) {
+            return super.toString() + "\n" + "\t" + "Tickets average " + "$" +String.format("%.2f",this.price) + " and feature exciting animals";
+        } else {
+            return super.toString() + "\n" + "\t" + "Tickets average " + "$" + String.format("%.2f",this.price);
+        }
+    }
+}
+
