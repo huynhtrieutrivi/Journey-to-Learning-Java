@@ -1,0 +1,586 @@
+/** This was a short program demonstrating knowledge in inheritance, abstract classes and a bit of GUI. Not all code were wrote by me, this was a template given to me by my professor Patty Kraft
+and we were expected to code in the mechanism for the race and how they were move and look**/
+
+---------------------------------------------------------------------------------------------------------------------------------------------------
+(Main Program: Race)
+
+import javax.swing.*;
+import java.awt.*;
+import java.util.ArrayList;
+
+public class Race extends JFrame {
+	private ArrayList<Racer> racerList; // racers stored in ArrayList
+	private static Race app;
+	private final int FIRST_RACER = 50;
+	private int finishX; // location of finish line, dependent on window width
+	private boolean raceIsOn = false;
+	private RacePanel racePanel;
+
+	/**
+	 * Constructor instantiates list to track racers sets up GUI components
+	 */
+	public Race() {
+		super("The Tortoise & The Hare!");
+		Container c = getContentPane();
+		racePanel = new RacePanel();
+		c.add(racePanel, BorderLayout.CENTER);
+
+		racerList = new ArrayList<Racer>();
+		setSize(400, 400);
+		setVisible(true);
+	}
+
+	/**
+	 * prepareToRace method 
+	 * uses a dialog box to prompt user for racer types and
+	 * to start the race 
+	 * racer types are	't' or 'T' for Tortoise, 
+	 * 						'h' or 'H' for Hare
+	 * 's' or 'S' will start the race
+	 */
+	private void prepareToRace() {
+		int yPos = FIRST_RACER; // y position of first racer
+		final int START_LINE = 40; // x position of start of race
+		final int RACER_SPACE = 60; // spacing between racers
+		char input;
+
+		input = getRacer(); // get input from user
+
+		while (input != 's' && input != 'S') {
+			switch(input) {
+				case 't':
+				case 'T':
+					racerList.add(new Tortoise("Tortoise", START_LINE, yPos ));
+					yPos += RACER_SPACE;
+					break;
+				case 'h':
+				case 'H':
+					racerList.add(new Hare("Hare", START_LINE, yPos));
+					yPos += RACER_SPACE;
+					break;
+				case 'g':
+				case 'G':
+					racerList.add(new Snowman("Snowman", START_LINE, yPos));
+					yPos += RACER_SPACE;
+					break;
+			}
+
+				
+			/** end of student code, Part 1 */
+
+			repaint();
+			input = getRacer(); // get input from user
+
+		} // end while
+	} // end prepareToRace
+
+	private class RacePanel extends JPanel {
+		/**
+		 * paint method
+		 * 
+		 * @param g
+		 *           Graphics context draws the finish line; moves and draws
+		 *           racers
+		 */
+
+		protected void paintComponent(Graphics g) {
+			super.paintComponent(g);
+
+			// draw the finish line
+			finishX = getWidth() - 20;
+			g.setColor(Color.blue);
+			g.drawLine(finishX, 0, finishX, getHeight());
+
+			if (raceIsOn) {
+				for(Racer racer: racerList) {
+					racer.move();
+					racer.draw(g);
+				}
+			} else {
+				for(Racer racer: racerList) {
+					racer.draw(g);
+				}
+			}
+		}
+	}
+
+	/**
+	 * runRace method checks whether any racers have been added to racerList if
+	 * no racers, exits with message otherwise, runs race, calls repaint to move
+	 * & draw racers calls reportRaceResults to identify winners(s) calls reset
+	 * to set up for next race
+	 * @throws InterruptedException 
+	 */
+	public void runRace() throws InterruptedException  {
+		if (racerList.size() == 0) {
+			JOptionPane.showMessageDialog(this, "The race has no racers. exiting",
+					"No Racers", JOptionPane.ERROR_MESSAGE);
+			System.exit(0);
+		}
+		raceIsOn = true;
+		while (!findWinner()) {
+			// slow down here if you know how
+			Thread.sleep(30);
+			repaint();
+		} // end while
+
+		reportRaceResults();
+		reset();
+	}
+
+	/**
+	 * gets racer selection from user
+	 * 
+	 * @return first character of user entry if user presses cancel, exits the
+	 *         program
+	 */
+	private char getRacer() {
+		String input = JOptionPane.showInputDialog(this, "Enter a racer:"
+				+ "\nt for Tortoise, h for hare, g for Snowman" + "\nor s to start the race");
+		if (input == null) {
+			System.out.println("Exiting");
+			System.exit(0);
+		}
+		if (input.length() == 0)
+			return 'n';
+		else
+			return input.charAt(0);
+	}
+
+	/**
+	 * findWinners: checks for any racer whose x position is past the finish line
+	 * 
+	 * @return true if any racer's x position is past the finish line or false if
+	 *         no racer's x position is past the finish line
+	 */
+	private boolean findWinner() {
+		for (Racer r : racerList) {
+			if (r.getX() > finishX) {
+				r.isWinner = true;
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * reportRaceResults : compiles winner names and prints message winners are
+	 * all racers whose x position is past the finish line
+	 */
+	private void reportRaceResults() {
+		raceIsOn = false;
+		String results = "Racer ";
+		for (int i = 0; i < racerList.size(); i++) {
+			if (racerList.get(i).getX() > finishX) {
+				results += (i + 1) + ", a " + racerList.get(i).getID() + ", ";
+			}
+		}
+
+		JOptionPane.showMessageDialog(this, results + " win(s) the race ");
+
+	}
+
+	/**
+	 * reset: sets up for next race: sets raceIsOn flag to false clears the list
+	 * of racers resets racer position to FIRST_RACER enables checkboxes and
+	 * radio buttons
+	 * @throws InterruptedException 
+	 */
+	private void reset() throws InterruptedException {
+		char answer;
+		String input = JOptionPane.showInputDialog(this, "Another race? (y, n)");
+		if (input == null || input.length() == 0) {
+			System.out.println("Exiting");
+			System.exit(0);
+		}
+
+		answer = input.charAt(0);
+		if (answer == 'y' || answer == 'Y') {
+			raceIsOn = false;
+			racerList.clear();
+			app.prepareToRace();
+			app.runRace();
+		} else
+			System.exit(0);
+	}
+
+	/**
+	 * main instantiates the Race object app 
+	 * calls runRace method
+	 * @throws InterruptedException 
+	 */
+	public static void main(String[] args) throws InterruptedException {
+		app = new Race();
+		app.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		app.prepareToRace();
+		app.runRace();
+	}
+
+}
+
+---------------------------------------------------------------------------------------------------------------------------------------------------
+
+(Racer Abstract Class)
+
+import java.awt.Graphics;
+
+public abstract class Racer {
+	private String ID;	// racer ID
+	private int x;			// x position
+	private int y;			// y position
+	protected boolean isWinner;
+
+	/** default constructor
+	 *  Sets ID to blank
+	 */
+	public Racer() {
+		ID = "";
+		isWinner = false;
+	}
+	
+	/** Constructor
+	 * @param rID	racerID
+	 * @param rX	x position
+	 * @param rY	y position
+	 */
+	public Racer(String rID, int rX, int rY) {
+		ID = rID;
+		x = rX;
+		y = rY;
+	}
+	/** accessor for ID
+	 * @return	ID
+	 */
+	public String getID() {
+		return ID;
+	}
+	
+	/** accessor for x
+	 * @return	current x value
+	 */
+	public int getX() {
+		return x;
+	}
+	
+	/** accessor for y
+	 * @return	current y value
+	 */
+	public int getY() {
+		return y;
+	}
+
+	/** mutator for x
+	 * @param	newX	new value for x
+	 */
+	public void setX(int newX) {
+		x = newX;
+	}
+
+	/** mutator for y
+	 * @param 	newY	new value for y
+	 */
+	public void setY(int newY) {
+		y = newY;
+	}
+
+	/** abstract method for Racer's move
+	 */
+	public abstract void move();
+
+	public abstract void morph(Graphics g);
+	
+	/** abstract method for drawing Racer
+	 *  @param	g	Graphics context
+	 */
+	public abstract void draw( Graphics g );
+	
+}
+
+---------------------------------------------------------------------------------------------------------------------------------------------------
+
+(Snowman)
+
+/**  Tortoise class
+ *    inherits from abstract Racer class
+ */
+
+import java.awt.*;
+import java.util.Random;
+
+public class Snowman extends Racer {
+    private int speed;
+    private Random rand;
+
+    /** Default Constructor: calls Racer default constructor
+     */
+    public Snowman( )
+    {
+        super( );
+        setRandAndSpeed();
+    }
+
+    /** Constructor
+     *    @param rID  racer Id, passed to Racer constructor
+     *    @param rX    x position, passed to Racer constructor
+     *    @param rY    y position, passed to Racer constructor
+     */
+    public Snowman( String rID, int rX, int rY )
+    {
+        super( rID, rX, rY );
+        setRandAndSpeed();;
+    }
+
+    /** move:  calculates the new x position for the racer
+     *   Tortoise move characteristics: "slow & steady wins the race"
+     *      increment x by 1 most of the time
+     */
+    public void move( )
+    {
+        Random rand = new Random( );
+        int move =  rand.nextInt( 10 ) + 1 ;
+
+        if ( move > 4 ) {
+            setX(getX() + 5);
+            setY(getY() + 2);
+        } else if (move < 2) {
+            setY(getY() - 4);
+        } else {
+            setX(getX() - 4);
+        }
+    }
+
+    /** draw: draws the Tortoise at current (x, y) coordinate
+     *       @param g   Graphics context
+     */
+    public void draw( Graphics g )
+    {
+        int startX = getX( );
+        int startY = getY( );
+
+        g.setColor( new Color( 255, 255, 255 ) ); // dark green
+
+        if(this.isWinner) {
+            morph(g);
+        }
+        //body
+        g.fillOval(startX-29, startY+12, 9, 9);
+        if(this.isWinner) {
+            g.setColor(Color.YELLOW);
+        }
+        g.fillOval(startX-32, startY+19, 14, 14);
+        g.fillOval(startX-35, startY+29, 20, 18);
+
+        g.setColor(Color.BLACK);
+        if(this.isWinner) {
+            g.setColor(Color.RED);
+        }
+        g.drawLine (startX-29, startY+12, startX-20, startY+12);
+        if(this.isWinner) {
+            g.setColor(Color.MAGENTA);
+        }
+        g.fillRect(startX-27, startY+7, 6,5 );
+        if(this.isWinner) {
+            g.fillRect(startX-27, startY+2, 6,10 );
+        }
+
+    }
+
+    @Override
+    public void morph(Graphics g) {
+        g.setColor( new Color( 3, 3, 3 ) );
+    }
+
+    private void setRandAndSpeed() {
+        rand = new Random( );
+        speed = rand.nextInt( 10 ) + 90;
+    }
+
+}
+
+---------------------------------------------------------------------------------------------------------------------------------------------------
+
+(Hare)
+
+/** Hare class
+*   inherits from abstract Racer class
+*/
+
+import java.awt.Graphics;
+import java.awt.Color;
+import java.util.Random;
+
+public class Hare extends Racer
+{
+   /** Default Constructor: calls Racer default constructor
+   */
+   public Hare( )
+   {
+     super( );
+   }
+
+   /** Constructor
+   *    @param rID   racer Id, passed to Racer constructor
+   *    @param rX    x position, passed to Racer constructor
+   *    @param rY    y position, passed to Racer constructor
+   */
+   public Hare( String rID, int rX, int rY )
+   {
+     super( rID, rX, rY );
+   }
+
+   /** move:  calculates the new x position for the racer
+   *   Hare move characteristics:  30% of the time, Hare jumps 5 pixels
+   *                               70% of the time, Hare sleeps (no move)
+   *   generates random number between 1 & 10
+   *          for 1 - 7,  no change to x position
+   *          for 8 - 10, x position is incremented by 5
+   */
+   public void move( )
+   {
+      Random rand = new Random( );
+     int move =  rand.nextInt( 10 ) + 1 ;
+
+     if ( getX( ) < 100 )
+     {
+      if ( move > 7 )
+       setX( getX( ) + 5 );
+     }
+     else
+     {
+      if ( move > 7 )
+       setX( getX( ) + 5 );
+     }
+   }
+
+   /** draw: draws the Hare at current (x, y) coordinate
+   *   @param g   Graphics context
+   */
+   public void draw( Graphics g )
+   {
+     int startY = getY( );
+     int startX = getX( );
+
+     // tail
+     g.setColor( Color.LIGHT_GRAY );
+       if(this.isWinner) {
+           morph(g);
+       }
+     g.fillOval( startX - 37, startY + 8,  12, 12 ) ;
+
+     //body
+     g.setColor( Color.GRAY );
+       if(this.isWinner) {
+           morph(g);
+       }
+     g.fillOval( startX - 30, startY,  20,  20 );
+
+     //head
+
+       g.fillOval( startX - 13, startY + 2, 13, 8 );
+       g.fillOval( startX - 13, startY - 8, 8, 28 );
+
+       if(this.isWinner) {
+           g.setColor(Color.WHITE);
+           g.fillOval( startX - 13, startY + 2, 13, 15 );
+           g.fillOval( startX - 13, startY - 8, 8, 28 );
+       }
+     //flatten bottom
+     g.clearRect( startX - 37, startY + 15, 32, 5 );
+   }
+
+    @Override
+    public void morph(Graphics g) {
+        g.setColor( new Color( 3, 3, 3 ) );
+    }
+}
+
+---------------------------------------------------------------------------------------------------------------------------------------------------
+
+/**  Tortoise class
+*    inherits from abstract Racer class
+*/
+
+import java.awt.Graphics;
+import java.awt.Color;
+import java.util.Random;
+
+public class Tortoise extends Racer
+{
+	private int speed;
+	private Random rand;
+
+   /** Default Constructor: calls Racer default constructor
+   */
+   public Tortoise( )
+   {
+     super( );
+     setRandAndSpeed();
+   }
+
+   /** Constructor
+   *    @param rID  racer Id, passed to Racer constructor
+   *    @param rX    x position, passed to Racer constructor
+   *    @param rY    y position, passed to Racer constructor
+   */
+   public Tortoise( String rID, int rX, int rY )
+   {
+     super( rID, rX, rY );
+     setRandAndSpeed();
+   }
+
+   /** move:  calculates the new x position for the racer
+   *   Tortoise move characteristics: "slow & steady wins the race"
+   *      increment x by 1 most of the time
+   */
+   public void move( )
+   {
+     int move =  rand.nextInt( 100 )  + 1;
+     if ( move < speed )
+       setX( getX( ) + 1 );
+   }
+
+   /** draw: draws the Tortoise at current (x, y) coordinate
+   *       @param g   Graphics context
+   */
+   public void draw( Graphics g )
+   {
+     int startX = getX( );
+     int startY = getY( );
+     
+     	g.setColor( new Color( 34, 139, 34 ) ); // dark green
+       if(this.isWinner) {
+           morph(g);
+       }
+
+     //body
+     g.fillOval( startX - 30, startY, 25, 15 );
+
+     //head
+     if(!this.isWinner) {
+         g.fillOval( startX - 10, startY + 5,  15, 10 );
+     }
+
+     //flatten bottom
+      g.clearRect( startX - 30, startY + 11, 35, 4 );
+
+     //feet
+     g.setColor( new Color( 34, 139, 34 ) );  // brown
+     g.fillOval( startX - 27, startY + 10,  5, 5 );
+     g.fillOval( startX - 13, startY + 10, 5, 5 );
+
+   }
+   
+   private void setRandAndSpeed( ) {
+      // percentage of time (between 90 - 99%) that this tortoise moves each turn
+      rand = new Random( );
+      speed = rand.nextInt( 10 ) + 90;
+   }
+
+    @Override
+    public void morph(Graphics g) {
+        g.setColor(Color.BLUE);
+    }
+}
+
+
+// https://imgur.com/a/UuVQ6Vt <---- Some picture that shows that the program was working
